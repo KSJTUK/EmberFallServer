@@ -18,7 +18,7 @@ RecvBuffer::RecvBuffer(RecvBuffer&& other) noexcept
     mWriteCursor{ other.mWriteCursor },
     mBufferSize{ BUFFER_SIZE * BUFFER_COUNT }
 {
-    memcpy(mBuffer.data(), other.mBuffer.data(), other.mWriteCursor);
+    other.ReadAll(mBuffer.data());
     other.Clean();
 }
 
@@ -26,7 +26,7 @@ void RecvBuffer::operator=(RecvBuffer&& other) noexcept
 {
     mReadCursor = other.mReadCursor;
     mWriteCursor = other.mWriteCursor;
-    memcpy(mBuffer.data(), other.mBuffer.data(), other.mWriteCursor);
+    other.ReadAll(mBuffer.data());
     other.Clean();
 }
 
@@ -42,7 +42,7 @@ void RecvBuffer::Clean()
         mReadCursor = 0;
         mWriteCursor = 0;
     }
-    else if (FreeSize() < mBufferSize) {
+    else if (FreeSize() < BUFFER_SIZE) {
         ::memcpy(&mBuffer[0], &mBuffer[mReadCursor], dataSize);
         mReadCursor = 0;
         mWriteCursor = dataSize;
@@ -51,12 +51,14 @@ void RecvBuffer::Clean()
 
 bool RecvBuffer::Read(char* data, INT32 readBytes)
 {
-    bool readAll = DataSize() >= readBytes;
+    if (DataSize() < readBytes) {
+        return false;
+    }
 
     ::memcpy(data, &mBuffer[mReadCursor], readBytes);
     mReadCursor += readBytes;
 
-    return readAll;
+    return true;
 }
 
 INT32 RecvBuffer::ReadAll(char* data)
@@ -76,6 +78,8 @@ bool RecvBuffer::Write(const char* data, INT32 writeBytes)
 
     ::memcpy(&mBuffer[mWriteCursor], data, writeBytes);
     mWriteCursor += writeBytes;
+
+    return true;
 }
 
 INT32 RecvBuffer::FreeSize() const

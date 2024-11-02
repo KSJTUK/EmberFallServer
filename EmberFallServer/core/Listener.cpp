@@ -2,6 +2,9 @@
 #include "core/Listener.h"
 #include "utils/Utils.h"
 #include "utils/Constants.h"
+#include "Global.h"
+
+#include "core/ClientManager.h"
 
 Listener::Listener()
     : mListenSocket{ INVALID_SOCKET },
@@ -33,7 +36,7 @@ void Listener::InitializeNetwork()
     sockaddr_in serverAddr;
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = ::htons(Global::PORT);
+    serverAddr.sin_port = ::htons(Constant::PORT);
     serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
 
     if (SOCKET_ERROR == ::bind(mListenSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr))) {
@@ -65,10 +68,11 @@ void Listener::AcceptWorker()
         ::inet_ntop(AF_INET, &clientAddr.sin_addr, ipaddr, INET_ADDRSTRLEN);
         port = ::ntohs(clientAddr.sin_port);
 
-        std::cout << std::format("클라이언트 접속 [IP: {}, PORT{}]\n", ipaddr, port);
-
-        ::shutdown(clientSocket, SD_BOTH);
-        ::closesocket(clientSocket);
+        bool createSuccess = Global::cm.CreateClient(clientSocket);
+        if (not createSuccess) {
+            ::shutdown(clientSocket, SD_BOTH);
+            ::closesocket(clientSocket);
+        }
     }
 }
 

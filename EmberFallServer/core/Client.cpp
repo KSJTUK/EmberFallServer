@@ -1,5 +1,8 @@
 #include "pch.h"
-#include "Client.h"
+#include "core/Client.h"
+#include "utils/Utils.h"
+#include "buffer/RecvBuffer.h"
+#include "buffer/SendBuffer.h"
 
 Client::Client()
     : mSocket{ INVALID_SOCKET},
@@ -12,10 +15,6 @@ Client::Client()
 }
 
 Client::~Client()
-{
-}
-
-Client::Client(const Client& other)
 {
 }
 
@@ -36,6 +35,10 @@ std::mutex& Client::GetSendMutex()
 
 bool Client::InitializeClient(SOCKET socket, BYTE id)
 {
+    if (INVALID_SOCKET == socket) {
+        return false;
+    }
+
     mSocket = socket;
     sockaddr_in clientAddr;
     memset(&clientAddr, 0, sizeof(clientAddr));
@@ -46,10 +49,18 @@ bool Client::InitializeClient(SOCKET socket, BYTE id)
     mPort = ::ntohs(clientAddr.sin_port);
     mId = id;
 
+    // 클라이언트에게 ID 통지
+    int sendIdResult = ::send(mSocket, reinterpret_cast<char*>(&mId), 1, 0);
+
     std::cout << std::format("클라이언트 [{}] 입장: IP: {}, Port: {}\n", id, mIP.data(), mPort);
+
+    mRecvBuffer = std::make_unique<RecvBuffer>();
+    mSendBuffer = std::make_unique<SendBuffer>();
 
     mSendThread = std::thread{ [=](){ SendWorker(); } };
     mRecvThread = std::thread{ [=](){ RecvWorker(); } };
+
+    return true;
 }
 
 void Client::ShutdownClient()
@@ -73,6 +84,8 @@ void Client::JoinThreads()
     if (mSendThread.joinable()) {
         mSendThread.join();
     }
+
+    std::cout << std::format("클라이언트 [{}] 퇴장: IP: {}, Port: {}\n", mId, mIP.data(), mPort);
 }
 
 void Client::WakeSendThread()
@@ -82,21 +95,75 @@ void Client::WakeSendThread()
 
 void Client::SendWorker()
 {
+    int sendResult = 0;
+    while (true) {
+        std::unique_lock lock{ mSendLock };
+        mSendConditionVar.wait(lock, [=]() { return false == mSendBuffer->Empty(); });
+
+        /* TODO send 기능 작성 */
+        int dataSize = mSendBuffer->DataSize();
+#ifdef NETWORK_DEBUG
+        std::cout << "SendThread WakeUp DataSize is : " << dataSize << std::endl;
+#endif
+        while (true) {
+            if (dataSize < SEND_AT_ONCE) {
+                sendResult = ::send(mSocket, mSendBuffer->Buffer(), dataSize, 0);
+                dataSize = 0;
+                break;
+            }
+
+            sendResult = ::send(mSocket, mSendBuffer->Buffer(), SEND_AT_ONCE, 0);
+            dataSize -= SEND_AT_ONCE;
+        }
+
+        mSendBuffer->Clean();
+    }
 }
 
 void Client::RecvWorker()
 {
+    int len = 0;
+    char buffer[RECV_AT_ONCE];
+    while (true) {
+        len = ::recv(mSocket, buffer, RECV_AT_ONCE, 0);
+        if (len < 0) {
+            ErrorHandle::WSAErrorMessageBox("recv function failure");
+            break;
+        }
+        else if (len == 0) {
+            break;
+        }
+
+#ifdef NETWORK_DEBUG
+        std::cout << std::format("Recv Len: {}\n", len);
+#endif 
+
+        /* TODO recv 기능 작성 */
+        std::lock_guard lock{ mRecvLock };
+        mRecvBuffer->Write(buffer, len);
+    }
 }
 
-void Client::ReadFromRecvBuffer()
+void Client::ReadFromRecvBuffer(RecvBuffer& buffer)
 {
+    std::lock_guard guard{ mRecvLock };
+    buffer = std::move(*mRecvBuffer);
 }
 
-void Client::SendChatPacket(std::string_view str)
+void Client::SendChatPacket(BYTE senderId, std::string_view str)
 {
+    PacketChatting chat{ sizeof(PacketChatting), PT_SC_PacketChatting, senderId, { } };
+    if (str.size() > CHAT_PACKET_MAX_SIZE) {
+        ErrorHandle::CommonErrorMessageBox("ChatPacketSize Over MaxSize", "...");
+        return;
+    }
+    memcpy(chat.chatBuffer, str.data(), str.size());
+
+    std::cout << std::format("Send id: {}, contents: {}\n", chat.id, chat.chatBuffer);
+    mSendBuffer->Write(&chat, chat.size);
 }
 
 bool Client::NullClient() const
 {
-    return INVALID_SOCKET == mSocket;
+    return INVALID_SOCKET == mSocket or not mRecvBuffer or not mSendBuffer;
 }

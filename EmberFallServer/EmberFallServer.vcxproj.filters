@@ -45,6 +45,7 @@
     <ClInclude Include="buffer\SendBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
+    <ClInclude Include="Global.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -77,5 +78,6 @@
     <ClCompile Include="buffer\SendBuffer.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
+    <ClCompile Include="Global.cpp" />
   </ItemGroup>
 </Project>

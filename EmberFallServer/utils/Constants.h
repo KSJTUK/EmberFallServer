@@ -1,5 +1,5 @@
 #pragma once
 
-namespace Global {
+namespace Constant {
     constexpr UINT16 PORT = 25000;
 }

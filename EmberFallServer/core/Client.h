@@ -1,10 +1,12 @@
 #pragma once
+
 class Client {
+    static constexpr size_t RECV_AT_ONCE = 1024;
+    static constexpr size_t SEND_AT_ONCE = 512;
+
 public:
     Client();
     ~Client();
-
-    Client(const Client& other);
 
 public:
     BYTE GetId() const;
@@ -21,8 +23,8 @@ public:
     void SendWorker();
     void RecvWorker();
 
-    void ReadFromRecvBuffer();
-    void SendChatPacket(std::string_view str);
+    void ReadFromRecvBuffer(class RecvBuffer& buffer);
+    void SendChatPacket(BYTE senderId, std::string_view str);
 
     bool NullClient() const;
 
@@ -38,8 +40,8 @@ private:
     std::mutex mSendLock;
     std::condition_variable mSendConditionVar;
 
-    std::array<char, 1024> mRecvBuffer;
-    std::array<char, 1024> mSendBuffer;
+    std::unique_ptr<class RecvBuffer> mRecvBuffer;
+    std::unique_ptr<class SendBuffer> mSendBuffer;
 
     BYTE mId;
 };

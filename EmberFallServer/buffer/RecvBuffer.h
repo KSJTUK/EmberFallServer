@@ -27,7 +27,7 @@ public:
     bool Read(char* data, INT32 readBytes);
     /// <summary>
     /// 버퍼에 저장된 모든 데이터를 복사해서 읽음.
-    /// </summary>a
+    /// </summary>
     /// <param name="data">이 함수에서 data의 메모리 공간은 보장하지 않는다. 항상 BufferSize 이상의 메모리를 할당하고 함수를 호출할것</param>
     /// <returns>읽은 데이터의 크기를 반환</returns>
     INT32 ReadAll(char* data);

@@ -11,7 +11,8 @@ public:
     bool CreateClient(SOCKET socket);
     void ShutdownClient(BYTE id);
     Client* GetClient(BYTE id);
+    std::vector<std::unique_ptr<Client>>& GetClients();
 
 private:
-    std::vector<Client> mClients;
+    std::vector<std::unique_ptr<Client>> mClients;
 };
