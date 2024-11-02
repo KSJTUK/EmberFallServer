@@ -49,8 +49,26 @@ void Listener::InitializeNetwork()
 
 void Listener::AcceptWorker()
 {
-    for (auto i : std::views::iota(0, 100)) {
-        std::cout << std::format("Test Accept Worker {}", i) << std::endl;
+    sockaddr_in clientAddr;
+    int addrLen{ sizeof(clientAddr) };
+
+    while (true) {
+        memset(&clientAddr, 0, sizeof(clientAddr));
+        SOCKET clientSocket = ::accept(mListenSocket, reinterpret_cast<sockaddr*>(&clientAddr), &addrLen);
+        if (INVALID_SOCKET == clientSocket) {
+            ErrorHandle::WSAErrorMessageBox("client accept failure");
+            break;
+        }
+        
+        char ipaddr[INET_ADDRSTRLEN]{ };
+        UINT16 port;
+        ::inet_ntop(AF_INET, &clientAddr.sin_addr, ipaddr, INET_ADDRSTRLEN);
+        port = ::ntohs(clientAddr.sin_port);
+
+        std::cout << std::format("클라이언트 접속 [IP: {}, PORT{}]\n", ipaddr, port);
+
+        ::shutdown(clientSocket, SD_BOTH);
+        ::closesocket(clientSocket);
     }
 }
 
