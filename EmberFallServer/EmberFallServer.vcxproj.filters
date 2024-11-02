@@ -27,6 +27,9 @@
     <ClInclude Include="utils\Constants.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="Protocol.h" />
+    <ClInclude Include="ClientManager.h" />
+    <ClInclude Include="Client.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -47,5 +50,7 @@
     <ClCompile Include="utils\Constants.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="ClientManager.cpp" />
+    <ClCompile Include="Client.cpp" />
   </ItemGroup>
 </Project>

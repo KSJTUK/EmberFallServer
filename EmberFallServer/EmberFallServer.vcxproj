@@ -139,13 +139,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Client.h" />
+    <ClInclude Include="ClientManager.h" />
     <ClInclude Include="core\Listener.h" />
     <ClInclude Include="core\ThreadManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\Constants.h" />
     <ClInclude Include="utils\Utils.h" />
+    <ClInclude Include="Protocol.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="ClientManager.cpp" />
     <ClCompile Include="core\Listener.cpp" />
     <ClCompile Include="core\ThreadManager.cpp" />
     <ClCompile Include="pch.cpp">
