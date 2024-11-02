@@ -12,6 +12,7 @@ public:
 public:
     bool InitializeClient(SOCKET socket, BYTE id);
     void ShutdownClient();
+    void JoinThreads();
 
     void WakeSendThread();
 
@@ -20,6 +21,8 @@ public:
 
     void ReadFromRecvBuffer();
     void SendChatPacket(std::string_view str);
+
+    bool NullClient() const;
 
 private:
     SOCKET mSocket;

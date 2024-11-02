@@ -50,12 +50,30 @@ bool Client::InitializeClient(SOCKET socket, BYTE id)
 
 void Client::ShutdownClient()
 {
+    ::shutdown(mSocket, SD_BOTH);
+    ::closesocket(mSocket);
 
+    JoinThreads();
+
+    mSocket = INVALID_SOCKET;
+    memset(mIP.data(), 0, INET_ADDRSTRLEN);
+    mPort = 0;
+}
+
+void Client::JoinThreads()
+{
+    if (mRecvThread.joinable()) {
+        mRecvThread.join();
+    }
+
+    if (mSendThread.joinable()) {
+        mSendThread.join();
+    }
 }
 
 void Client::WakeSendThread()
 {
-
+    mSendConditionVar.notify_one();
 }
 
 void Client::SendWorker()
@@ -72,4 +90,9 @@ void Client::ReadFromRecvBuffer()
 
 void Client::SendChatPacket(std::string_view str)
 {
+}
+
+bool Client::NullClient() const
+{
+    return INVALID_SOCKET == mSocket;
 }

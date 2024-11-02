@@ -2,6 +2,7 @@
 
 inline constexpr size_t CHAT_PACKET_MAX_SIZE = 100;
 inline constexpr unsigned char NULLID = 0xff;
+inline constexpr unsigned char MAX_CLIENT = 16;
 
 /// <summary>
 /// SC -> From Server To Client
