@@ -18,6 +18,15 @@
     <ClInclude Include="utils\Utils.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="core\Listener.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ThreadManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Constants.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -27,6 +36,15 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="utils\Utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Listener.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ThreadManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Constants.cpp">
       <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
