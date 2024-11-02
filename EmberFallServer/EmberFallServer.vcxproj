@@ -139,8 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Client.h" />
-    <ClInclude Include="ClientManager.h" />
+    <ClInclude Include="buffer\RecvBuffer.h" />
+    <ClInclude Include="buffer\SendBuffer.h" />
+    <ClInclude Include="core\Client.h" />
+    <ClInclude Include="core\ClientManager.h" />
     <ClInclude Include="core\Listener.h" />
     <ClInclude Include="core\ThreadManager.h" />
     <ClInclude Include="pch.h" />
@@ -149,8 +151,10 @@
     <ClInclude Include="Protocol.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Client.cpp" />
-    <ClCompile Include="ClientManager.cpp" />
+    <ClCompile Include="buffer\RecvBuffer.cpp" />
+    <ClCompile Include="buffer\SendBuffer.cpp" />
+    <ClCompile Include="core\Client.cpp" />
+    <ClCompile Include="core\ClientManager.cpp" />
     <ClCompile Include="core\Listener.cpp" />
     <ClCompile Include="core\ThreadManager.cpp" />
     <ClCompile Include="pch.cpp">

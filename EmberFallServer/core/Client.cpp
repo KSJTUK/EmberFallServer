@@ -15,6 +15,10 @@ Client::~Client()
 {
 }
 
+Client::Client(const Client& other)
+{
+}
+
 BYTE Client::GetId() const
 {
     return mId;
@@ -42,7 +46,7 @@ bool Client::InitializeClient(SOCKET socket, BYTE id)
     mPort = ::ntohs(clientAddr.sin_port);
     mId = id;
 
-    std::cout << std::format("클라이언트 [{}] 입장: IP: {}, Port: {}\n", id, mIP, mPort);
+    std::cout << std::format("클라이언트 [{}] 입장: IP: {}, Port: {}\n", id, mIP.data(), mPort);
 
     mSendThread = std::thread{ [=](){ SendWorker(); } };
     mRecvThread = std::thread{ [=](){ RecvWorker(); } };

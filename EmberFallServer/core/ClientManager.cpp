@@ -4,7 +4,9 @@
 
 ClientManager::ClientManager() 
 {
-    mClients.resize(MAX_CLIENT);
+    for (auto idx : std::views::iota(0, static_cast<int>(MAX_CLIENT))) {
+        mClients.emplace_back();
+    }
 }
 
 ClientManager::~ClientManager() { }

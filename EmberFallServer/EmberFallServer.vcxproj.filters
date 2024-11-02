@@ -10,6 +10,9 @@
     <Filter Include="utils">
       <UniqueIdentifier>{418923c5-53e4-42da-926b-bf4785655416}</UniqueIdentifier>
     </Filter>
+    <Filter Include="buffer">
+      <UniqueIdentifier>{81a42966-672e-4d5b-b0d7-f285e56a29ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -27,9 +30,21 @@
     <ClInclude Include="utils\Constants.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="Protocol.h" />
-    <ClInclude Include="ClientManager.h" />
-    <ClInclude Include="Client.h" />
+    <ClInclude Include="core\Client.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ClientManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer\RecvBuffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer\SendBuffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -50,7 +65,17 @@
     <ClCompile Include="utils\Constants.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="ClientManager.cpp" />
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="core\Client.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ClientManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer\RecvBuffer.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer\SendBuffer.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

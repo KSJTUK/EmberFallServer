@@ -4,6 +4,8 @@ public:
     Client();
     ~Client();
 
+    Client(const Client& other);
+
 public:
     BYTE GetId() const;
     std::mutex& GetRecvMutex();
