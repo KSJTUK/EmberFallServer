@@ -7,10 +7,16 @@
     <Filter Include="core">
       <UniqueIdentifier>{28233af4-8a7e-4c15-883e-e0d7862ac957}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{418923c5-53e4-42da-926b-bf4785655416}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Utils.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -19,6 +25,9 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Utils.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
