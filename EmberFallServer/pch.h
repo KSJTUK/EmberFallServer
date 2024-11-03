@@ -36,3 +36,5 @@
 #include <condition_variable>
 
 #include "Protocol.h"
+
+#pragma warning(disable : 4828)

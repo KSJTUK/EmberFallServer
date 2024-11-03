@@ -27,6 +27,15 @@ void ClientManager::ShutdownClient(BYTE id)
     mClients[id]->ShutdownClient();
 }
 
+void ClientManager::CheckNullClient()
+{
+    for (int id = 0; id < MAX_CLIENT; ++id) {
+        if (mClients[id]->ExitedClient()) {
+            mClients[id]->ShutdownClient();
+        }
+    }
+}
+
 Client* ClientManager::GetClient(BYTE id)
 {
     return mClients[id].get();

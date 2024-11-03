@@ -26,6 +26,7 @@ public:
     void ReadFromRecvBuffer(class RecvBuffer& buffer);
     void SendChatPacket(BYTE senderId, std::string_view str);
 
+    bool ExitedClient() const;
     bool NullClient() const;
 
 private:
@@ -44,5 +45,7 @@ private:
     std::unique_ptr<class SendBuffer> mSendBuffer;
 
     BYTE mId;
+    std::atomic_flag mCleared;
+    std::atomic_flag mEntered;
 };
 

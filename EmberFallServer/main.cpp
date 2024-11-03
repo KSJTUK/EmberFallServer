@@ -21,7 +21,15 @@ int main(int argc, char* argv[])
 
     std::vector<std::pair<BYTE, std::string>> chatLog;
     PacketChatting chat;
+
+    size_t checkClientExitedFrame = 100;
+    size_t frame = 0;
     while (true) {
+        ++frame;
+        if (0 == frame % checkClientExitedFrame) {
+            Global::cm.CheckNullClient();
+        }
+
         for (auto& client : clients) {
             if (client->NullClient()) {
                 continue;
@@ -33,12 +41,11 @@ int main(int argc, char* argv[])
                 bool readSuccess = rBuffer.Read(reinterpret_cast<char*>(&chat), sizeof(PacketChatting));
                 if (not readSuccess) {
                     std::cout << "read failure" << std::endl;
+                    //rBuffer.Clear();
                     continue;
                 }
                 chatLog.push_back(std::make_pair(chat.id, chat.chatBuffer));
             }
-            
-            rBuffer.Clean();
         }
 
         for (auto& client : clients) {

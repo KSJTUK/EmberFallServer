@@ -12,6 +12,7 @@ Client::Client()
     mSendBuffer{ },
     mRecvBuffer{ }
 {
+    mCleared.test_and_set();
 }
 
 Client::~Client()
@@ -60,15 +61,24 @@ bool Client::InitializeClient(SOCKET socket, BYTE id)
     mSendThread = std::thread{ [=](){ SendWorker(); } };
     mRecvThread = std::thread{ [=](){ RecvWorker(); } };
 
+    mEntered.test_and_set();
+    mCleared.clear();
+
     return true;
 }
 
 void Client::ShutdownClient()
 {
+    // 이미 초기화 된 상태라면 다시 초기화를 진행하지 않는다.
+    mCleared.test_and_set();
+
     ::shutdown(mSocket, SD_BOTH);
     ::closesocket(mSocket);
 
     JoinThreads();
+
+    mRecvBuffer.reset();
+    mSendBuffer.reset();
 
     mSocket = INVALID_SOCKET;
     memset(mIP.data(), 0, INET_ADDRSTRLEN);
@@ -82,6 +92,11 @@ void Client::JoinThreads()
     }
 
     if (mSendThread.joinable()) {
+        if (mSendBuffer) {
+            char shutdown[20]{ "shutdown thread" };
+            mSendBuffer->Write(shutdown, 20);
+            mSendConditionVar.notify_all();
+        }
         mSendThread.join();
     }
 
@@ -116,8 +131,14 @@ void Client::SendWorker()
             dataSize -= SEND_AT_ONCE;
         }
 
+        if (sendResult < 0) {
+            break;
+        }
+
         mSendBuffer->Clean();
     }
+
+    mEntered.clear();
 }
 
 void Client::RecvWorker()
@@ -127,7 +148,7 @@ void Client::RecvWorker()
     while (true) {
         len = ::recv(mSocket, buffer, RECV_AT_ONCE, 0);
         if (len < 0) {
-            ErrorHandle::WSAErrorMessageBox("recv function failure");
+            //ErrorHandle::WSAErrorMessageBox("recv function failure");
             break;
         }
         else if (len == 0) {
@@ -142,6 +163,8 @@ void Client::RecvWorker()
         std::lock_guard lock{ mRecvLock };
         mRecvBuffer->Write(buffer, len);
     }
+
+    mEntered.clear();
 }
 
 void Client::ReadFromRecvBuffer(RecvBuffer& buffer)
@@ -163,7 +186,12 @@ void Client::SendChatPacket(BYTE senderId, std::string_view str)
     mSendBuffer->Write(&chat, chat.size);
 }
 
+bool Client::ExitedClient() const
+{
+    return not mEntered.test() and not mCleared.test();
+}
+
 bool Client::NullClient() const
 {
-    return INVALID_SOCKET == mSocket or not mRecvBuffer or not mSendBuffer;
+    return not mEntered.test();
 }
