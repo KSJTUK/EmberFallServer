@@ -26,7 +26,9 @@ public:
     void ReadFromRecvBuffer(class RecvBuffer& buffer);
     void SendChatPacket(BYTE senderId, std::string_view str);
 
+    // 클라이언트가 퇴장했으나 정리되지 않은 경우 true를 반환한다.
     bool ExitedClient() const;
+    // 클라이언트가 퇴장했고 정리되었다면 true를 반환한다.
     bool NullClient() const;
 
 private:
@@ -45,7 +47,16 @@ private:
     std::unique_ptr<class SendBuffer> mSendBuffer;
 
     BYTE mId;
+    /// <summary>
+    /// mCleared 변수는 현재 클라이언트가 정리된 상태인지 여부를 판별한다.
+    /// 즉, 나갔음에도 정리되지 않았다면 (Thread가 살아있거나, buffer, socket이 살아있는경우)
+    /// mEntered == false 이면서 mCleared == false인 상태이다.
+    /// 이경우에는 클라이언트를 정리하는 ShutdownClient 메소드를 호출한다.
+    /// </summary>
     std::atomic_flag mCleared;
+    /// <summary>
+    /// 클라이언트의 상태가 퇴장상태인지를 판별한다.
+    /// </summary>
     std::atomic_flag mEntered;
 };
 

@@ -193,5 +193,5 @@ bool Client::ExitedClient() const
 
 bool Client::NullClient() const
 {
-    return not mEntered.test();
+    return not mEntered.test() and mCleared.test();
 }
