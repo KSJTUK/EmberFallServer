@@ -70,7 +70,7 @@ bool Client::InitializeClient(SOCKET socket, BYTE id)
 void Client::ShutdownClient()
 {
     // 이미 초기화 된 상태라면 다시 초기화를 진행하지 않는다.
-    if (false == mCleared.test_and_set()) {
+    if (true == mCleared.test_and_set()) { // std::atomic_flag 의 test_and_set 은 성공하는 경우 이전의 플래그 값을 반환한다.
         return;
     }
 
