@@ -12,9 +12,13 @@ enum PacketType {
     // SC Part
     PT_SC_PacketConnected,
     PT_SC_PacketChatting,
+    PT_SC_PacketPosition,
+    PT_SC_PacketExit,
 
     // CS Part
     PT_CS_PacketChatting,
+    PT_CS_PacketKeyInput,
+    PT_CS_PacketExit,
 };
 
 #pragma pack(push, 1)
@@ -28,5 +32,13 @@ struct PacketConnected : public Packet { };
 
 struct PacketChatting : public Packet {
     char chatBuffer[CHAT_PACKET_MAX_SIZE];
+};
+
+struct PacketExit : public Packet { };
+
+struct PacketEnter : public Packet { };
+
+struct PacektPosition : public Packet {
+    DirectX::XMFLOAT3 position;
 };
 #pragma pack(pop)

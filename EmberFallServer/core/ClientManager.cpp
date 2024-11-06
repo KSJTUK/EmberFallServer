@@ -16,6 +16,7 @@ bool ClientManager::CreateClient(SOCKET socket)
     for (int id = 0; id < MAX_CLIENT; ++id) {
         if (mClients[id]->NullClient()) {  // 클라이언트가 퇴장했으며 또 정리가 된경우 -> 그자리에 새로 생성한다.
             mClients[id]->InitializeClient(socket, id);
+            return true;
         }
         else if (mClients[id]->ExitedClient()) {    // 클라이언트가 퇴장했으나 정리가 되지 않은 경우 -> 정리작업을 해준 후에 클라이언트를 생성한다.
             mClients[id]->ShutdownClient();

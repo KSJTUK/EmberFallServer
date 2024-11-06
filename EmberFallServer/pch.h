@@ -35,6 +35,8 @@
 #include <mutex>
 #include <condition_variable>
 
+#include <DirectXMath.h>
+
 #include "Protocol.h"
 
 #pragma warning(disable : 4828)

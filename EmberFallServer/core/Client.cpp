@@ -70,7 +70,9 @@ bool Client::InitializeClient(SOCKET socket, BYTE id)
 void Client::ShutdownClient()
 {
     // 이미 초기화 된 상태라면 다시 초기화를 진행하지 않는다.
-    mCleared.test_and_set();
+    if (false == mCleared.test_and_set()) {
+        return;
+    }
 
     ::shutdown(mSocket, SD_BOTH);
     ::closesocket(mSocket);
