@@ -35,6 +35,8 @@
 #include <mutex>
 #include <condition_variable>
 
+#include <set>
+
 #include <DirectXMath.h>
 
 #include "external/include/DirectXTK12/SimpleMath.h"
@@ -46,3 +48,5 @@
 #endif
 
 #include "Protocol.h"
+
+extern class Timer gTimer;

@@ -217,6 +217,13 @@ void Client::SendChatPacket(BYTE senderId, std::string_view str)
     mSendBuffer->Write(&chat, chat.size);
 }
 
+void Client::SendPlayerInfoPacket(BYTE senderId, const DirectX::SimpleMath::Vector3& position)
+{
+    PacketPlayerInfo playerInfo{ sizeof(PacketPlayerInfo), PT_SC_PacketPlayerInfo, senderId, position };
+
+    mSendBuffer->Write(&playerInfo, playerInfo.size);
+}
+
 bool Client::ExitedClient() const
 {
     return not mEntered.test() and not mCleared.test();

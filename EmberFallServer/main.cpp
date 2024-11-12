@@ -6,6 +6,7 @@
 #include "Global.h"
 #include "core/Client.h"
 #include "core/ClientManager.h"
+#include "utils/Timer.h"
 
 int main(int argc, char* argv[])
 {
@@ -20,11 +21,20 @@ int main(int argc, char* argv[])
     std::vector<std::unique_ptr<Client>>& clients = Global::cm.GetClients();
 
     std::vector<std::pair<BYTE, std::string>> chatLog;
+    std::vector<std::pair<BYTE, DirectX::SimpleMath::Vector3>> positionLog;
 
     size_t checkClientExitedFrame = 100;
     size_t frame = 0;
 
+    size_t sendPerTime = 30;
+    float sendTime = 1.0f / static_cast<float>(sendPerTime);
+    float sendCounter = 0.0f;
+
     while (true) {
+        gTimer.AdvanceTime();
+
+        sendCounter += gTimer.GetDeltaTime();
+
         ++frame;
         if (0 == frame % checkClientExitedFrame) {
             Global::cm.CheckNullClient();
@@ -64,7 +74,7 @@ int main(int argc, char* argv[])
                     recvBuffer.Read(info + sizeof(Packet), sizeof(PacketPlayerInfo) - sizeof(Packet));
                     memcpy(info, &header, sizeof(Packet));
 
-                    std::cout << std::format("Packet Position : ({}, {}, {})\n", playerInfo.position.x, playerInfo.position.y, playerInfo.position.z);
+                    positionLog.push_back(std::make_pair(header.id, playerInfo.position));
                 }
                 break;
 
@@ -75,21 +85,31 @@ int main(int argc, char* argv[])
             }
         }
 
-        for (auto& client : clients) {
-            if (client->NullClient()) {
-                continue;
-            }
-
-            if (false == chatLog.empty()) {
-                std::lock_guard guard{ client->GetSendMutex() };
-                for (const auto& [id, str] : chatLog) {
-                    client->SendChatPacket(id, str);
+        if (sendCounter > sendTime) {
+            for (auto& client : clients) {
+                if (client->NullClient()) {
+                    continue;
                 }
+
+                std::lock_guard guard{ client->GetSendMutex() };
+                if (false == chatLog.empty()) {
+                    for (const auto& [id, str] : chatLog) {
+                        client->SendChatPacket(id, str);
+                    }
+                }
+
+                if (false == positionLog.empty()) {
+                    for (const auto& [id, position] : positionLog) {
+                        client->SendPlayerInfoPacket(id, position);
+                    }
+                }
+
                 client->WakeSendThread();
             }
+            sendCounter = 0.0f;
+            chatLog.clear();
+            positionLog.clear();
         }
-
-        chatLog.clear();
     }
 
     listener.JoinAccept();

@@ -25,6 +25,7 @@ public:
 
     void ReadFromRecvBuffer(class RecvBuffer& buffer);
     void SendChatPacket(BYTE senderId, std::string_view str);
+    void SendPlayerInfoPacket(BYTE senderId, const DirectX::SimpleMath::Vector3& position);
 
     // 클라이언트가 퇴장했으나 정리되지 않은 경우 true를 반환한다.
     bool ExitedClient() const;
