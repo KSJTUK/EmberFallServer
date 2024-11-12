@@ -37,6 +37,12 @@
 
 #include <DirectXMath.h>
 
-#include "Protocol.h"
+#include "external/include/DirectXTK12/SimpleMath.h"
 
-#pragma warning(disable : 4828)
+#ifdef _DEBUG 
+#pragma comment(lib,"external/lib/debug/DirectXTK12.lib")
+#else
+#pragma comment(lib,"external/lib/release/DirectXTK12.lib")
+#endif
+
+#include "Protocol.h"

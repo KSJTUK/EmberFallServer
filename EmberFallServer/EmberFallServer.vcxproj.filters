@@ -46,6 +46,9 @@
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="Global.h" />
+    <ClInclude Include="utils\Timer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -79,5 +82,8 @@
       <Filter>buffer</Filter>
     </ClCompile>
     <ClCompile Include="Global.cpp" />
+    <ClCompile Include="utils\Timer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

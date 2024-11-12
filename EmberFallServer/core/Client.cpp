@@ -4,6 +4,9 @@
 #include "buffer/RecvBuffer.h"
 #include "buffer/SendBuffer.h"
 
+constexpr char ShutdownSentence[]{ "shutdown thread" };
+constexpr size_t ShutdownSentenceLen{ _countof(ShutdownSentence) };
+
 Client::Client()
     : mSocket{ INVALID_SOCKET},
     mIP{ },
@@ -37,7 +40,7 @@ std::mutex& Client::GetSendMutex()
 bool Client::InitializeClient(SOCKET socket, BYTE id)
 {
     if (INVALID_SOCKET == socket) {
-        return false;
+       return false;
     }
 
     mSocket = socket;
@@ -85,7 +88,7 @@ void Client::ShutdownClient()
     mSocket = INVALID_SOCKET;
     memset(mIP.data(), 0, INET_ADDRSTRLEN);
     mPort = 0;
-}
+} 
 
 void Client::JoinThreads()
 {
@@ -95,8 +98,7 @@ void Client::JoinThreads()
 
     if (mSendThread.joinable()) {
         if (mSendBuffer) {
-            char shutdown[20]{ "shutdown thread" };
-            mSendBuffer->Write(shutdown, 20);
+            mSendBuffer->Write(ShutdownSentence, ShutdownSentenceLen);
             mSendConditionVar.notify_all();
         }
         mSendThread.join();
@@ -145,26 +147,53 @@ void Client::SendWorker()
 
 void Client::RecvWorker()
 {
-    int len = 0;
+    int recvLen = 0;
+    int remainLen = 0;
+
+    int dataLen = 0;
+    char remainBuffer[RECV_AT_ONCE];
     char buffer[RECV_AT_ONCE];
     while (true) {
-        len = ::recv(mSocket, buffer, RECV_AT_ONCE, 0);
-        if (len < 0) {
-            //ErrorHandle::WSAErrorMessageBox("recv function failure");
+        recvLen = ::recv(mSocket, buffer, RECV_AT_ONCE, 0);
+        if (recvLen < 0) {
+#ifdef NETWORK_DEBUG
+            ErrorHandle::WSAErrorMessageBox("recv function failure");
+#endif
             break;
         }
-        else if (len == 0) {
+        else if (recvLen == 0) {
             break;
         }
 
 #ifdef NETWORK_DEBUG
-        std::cout << std::format("Recv Len: {}\n", len);
-#endif 
+        std::cout << "RecvLen: " << recvLen << std::endl;
+#endif
 
-        /* TODO recv 기능 작성 */
-        std::lock_guard lock{ mRecvLock };
-        mRecvBuffer->Write(buffer, len);
-    }
+        // 이전에 남은 데이터가 있을때 다시 검사하는 과정
+        if (remainLen > 0) {
+            if (recvLen + remainLen > RECV_AT_ONCE) {
+                ErrorHandle::CommonErrorMessageBoxAbort("remain data is so big", "error");
+                break;
+            }
+            else {
+                memmove(buffer + remainLen, buffer, recvLen);
+                memcpy(buffer, remainBuffer, remainLen);
+            }
+        }
+
+        // 새로 받아온 데이터에 대해서 검사하는 과정
+        remainLen = CheckPackets(buffer, recvLen);
+        dataLen = recvLen - remainLen;
+        if (remainLen > 0) {
+            std::lock_guard lock{ mRecvLock };
+            mRecvBuffer->Write(buffer, dataLen);
+            memcpy(remainBuffer, buffer + dataLen, remainLen);
+        }
+        else {
+            std::lock_guard lock{ mRecvLock };
+            mRecvBuffer->Write(buffer, dataLen);
+        }
+        }
 
     mEntered.clear();
 }
@@ -196,4 +225,25 @@ bool Client::ExitedClient() const
 bool Client::NullClient() const
 {
     return not mEntered.test() and mCleared.test();
+}
+
+size_t Client::CheckPackets(char* buffer, size_t len)
+{
+    size_t checkLen = 0;
+    size_t remainLen = 0;
+    while (checkLen < len) {
+        checkLen += buffer[0];
+#if defined(_DEBUG) || defined(DEBUG)
+        if (buffer[0] == 0) {
+            ErrorHandle::CommonErrorMessageBoxAbort("Recv Size is 0", "Packet's size member value is zero");
+        }
+#endif
+
+        if (len > checkLen) {
+            remainLen = len - checkLen;
+            break;
+        }
+    }
+
+    return remainLen;
 }

@@ -148,6 +148,7 @@
     <ClInclude Include="Global.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="utils\Constants.h" />
+    <ClInclude Include="utils\Timer.h" />
     <ClInclude Include="utils\Utils.h" />
     <ClInclude Include="Protocol.h" />
   </ItemGroup>
@@ -165,6 +166,7 @@
     </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utils\Constants.cpp" />
+    <ClCompile Include="utils\Timer.cpp" />
     <ClCompile Include="utils\Utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

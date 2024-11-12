@@ -9,6 +9,26 @@ namespace ErrorHandle {
         MessageBoxA(nullptr, str.c_str(), caption.data(), MB_ICONERROR);
     }
 
+    inline void CommonErrorMessageBoxExit(std::string_view caption, std::string_view contents, const std::source_location& sl = std::source_location::current())
+    {
+        auto str = std::format("Error Occurred!\n\nFILE: {}\n\nFUNCTION: {}\n\nLINE: {}\n\nError: {}",
+            sl.file_name(), sl.function_name(), sl.line(), contents);
+
+        MessageBoxA(nullptr, str.c_str(), caption.data(), MB_ICONERROR);
+
+        exit(EXIT_FAILURE);
+    }
+
+    inline void CommonErrorMessageBoxAbort(std::string_view caption, std::string_view contents, const std::source_location& sl = std::source_location::current())
+    {
+        auto str = std::format("Error Occurred!\n\nFILE: {}\n\nFUNCTION: {}\n\nLINE: {}\n\nError: {}",
+            sl.file_name(), sl.function_name(), sl.line(), contents);
+
+        MessageBoxA(nullptr, str.c_str(), caption.data(), MB_ICONERROR);
+
+        abort();
+    }
+
     inline void WSAErrorMessageBox(std::string_view caption, const std::source_location& sl = std::source_location::current())
     {
         auto errorCode = WSAGetLastError();

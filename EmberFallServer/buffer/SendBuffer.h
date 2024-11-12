@@ -22,7 +22,7 @@ public:
     /// data에 넘어온 메모리를 writeByte만큼 내부 버퍼에 복사
     /// </summary>
     /// <returns>현재 버퍼에 남은 크기가 writeBytes 보다 작다면 복사하지 않고 false를 리턴</returns>
-    bool Write(void* data, INT32 writeBytes);
+    bool Write(const void* data, INT32 writeBytes);
 
     /// <returns>현재 버퍼에 쓰여진 데이터가 없다면 true리턴</returns>
     bool Empty() const;

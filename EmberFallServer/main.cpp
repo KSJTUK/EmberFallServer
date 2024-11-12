@@ -15,15 +15,15 @@ int main(int argc, char* argv[])
     listener.InitializeNetwork();
 
     /* TODO Chat Logic */
-    RecvBuffer rBuffer;
+    RecvBuffer recvBuffer;
 
     std::vector<std::unique_ptr<Client>>& clients = Global::cm.GetClients();
 
     std::vector<std::pair<BYTE, std::string>> chatLog;
-    PacketChatting chat;
 
     size_t checkClientExitedFrame = 100;
     size_t frame = 0;
+
     while (true) {
         ++frame;
         if (0 == frame % checkClientExitedFrame) {
@@ -35,16 +35,43 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            client->ReadFromRecvBuffer(rBuffer);
+            client->ReadFromRecvBuffer(recvBuffer);
 
-            while (false == rBuffer.Empty()) {
-                bool readSuccess = rBuffer.Read(reinterpret_cast<char*>(&chat), sizeof(PacketChatting));
-                if (not readSuccess) {
-                    std::cout << "read failure" << std::endl;
-                    //rBuffer.Clear();
-                    continue;
+            Packet header;
+            char temp[512];
+            while (false == recvBuffer.Empty()) {
+                if (false == recvBuffer.Read(reinterpret_cast<char*>(&header), sizeof(Packet))) {
+                    abort();
                 }
-                chatLog.push_back(std::make_pair(chat.id, chat.chatBuffer));
+
+                switch (header.type) {
+                case PT_CS_PacketChatting:
+                {
+                    // 패킷 조립
+                    PacketChatting chatPacket;
+                    char* chat = reinterpret_cast<char*>(&chatPacket);
+                    recvBuffer.Read(chat + sizeof(Packet), sizeof(PacketChatting) - sizeof(Packet));
+                    memcpy(chat, &header, sizeof(Packet));
+
+                    chatLog.push_back(std::make_pair(header.id, chatPacket.chatBuffer));
+                }
+                break;
+
+                case PT_CS_PacketPlayerInfo:
+                {
+                    PacketPlayerInfo playerInfo;
+                    char* info = reinterpret_cast<char*>(&playerInfo);
+                    recvBuffer.Read(info + sizeof(Packet), sizeof(PacketPlayerInfo) - sizeof(Packet));
+                    memcpy(info, &header, sizeof(Packet));
+
+                    std::cout << std::format("Packet Position : ({}, {}, {})\n", playerInfo.position.x, playerInfo.position.y, playerInfo.position.z);
+                }
+                break;
+
+                default:
+                    recvBuffer.Read(temp, header.size - sizeof(Packet)); // 지금 당장 처리하지 않는 패킷 데이터 제거
+                    break;
+                }
             }
         }
 

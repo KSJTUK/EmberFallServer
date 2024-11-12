@@ -26,7 +26,7 @@ INT32 SendBuffer::DataSize() const
     return mWriteCursor;
 }
 
-bool SendBuffer::Write(void* data, INT32 writeBytes)
+bool SendBuffer::Write(const void* data, INT32 writeBytes)
 {
     if (mBuffer.size() - mWriteCursor < writeBytes) {
         return false;

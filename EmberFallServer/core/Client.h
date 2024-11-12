@@ -31,6 +31,8 @@ public:
     // 클라이언트가 퇴장했고 정리되었다면 true를 반환한다.
     bool NullClient() const;
 
+    size_t CheckPackets(char* buffer, size_t len);
+
 private:
     SOCKET mSocket;
     std::array<char, INET_ADDRSTRLEN> mIP;
