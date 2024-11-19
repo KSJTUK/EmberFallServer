@@ -37,7 +37,7 @@ constexpr size_t RecvBuffer::GetBufferSize() const
 
 void RecvBuffer::Clean()
 {
-    INT32 dataSize = DataSize();
+    size_t dataSize = DataSize();
     if (0 == dataSize) {
         mReadCursor = 0;
         mWriteCursor = 0;
@@ -49,7 +49,7 @@ void RecvBuffer::Clean()
     }
 }
 
-bool RecvBuffer::Read(char* data, INT32 readBytes)
+bool RecvBuffer::Read(char* data, size_t readBytes)
 {
     if (DataSize() < readBytes) {
         return false;
@@ -61,16 +61,16 @@ bool RecvBuffer::Read(char* data, INT32 readBytes)
     return true;
 }
 
-INT32 RecvBuffer::ReadAll(char* data)
+size_t RecvBuffer::ReadAll(char* data)
 {
-    INT32 dataSize = DataSize();
+    size_t dataSize = DataSize();
     ::memcpy(data, &mBuffer[mReadCursor], dataSize);
     mReadCursor += dataSize;
     Clean();
     return dataSize;
 }
 
-bool RecvBuffer::Write(const char* data, INT32 writeBytes)
+bool RecvBuffer::Write(const char* data, size_t writeBytes)
 {
     if (FreeSize() < writeBytes) {
         return false;
@@ -82,12 +82,12 @@ bool RecvBuffer::Write(const char* data, INT32 writeBytes)
     return true;
 }
 
-INT32 RecvBuffer::FreeSize() const
+size_t RecvBuffer::FreeSize() const
 {
     return GetBufferSize() - mWriteCursor;
 }
 
-INT32 RecvBuffer::DataSize() const
+size_t RecvBuffer::DataSize() const
 {
     return mWriteCursor - mReadCursor;
 }

@@ -148,13 +148,19 @@ void Client::SendWorker()
 void Client::RecvWorker()
 {
     int recvLen = 0;
-    int remainLen = 0;
 
-    int dataLen = 0;
-    char remainBuffer[RECV_AT_ONCE];
-    char buffer[RECV_AT_ONCE];
+    RBuffer buffer;
+    ByteArray<MAX_ONE_PACKET_SIZE> remainBuffer;
+
+    auto bufferBegin = buffer.begin();
+    auto bufferDataPos = buffer.begin();
+    auto remainBegin = remainBuffer.begin();
+    auto remainPos = remainBuffer.begin();
+    ptrdiff_t remainLen = 0;
+
     while (true) {
-        recvLen = ::recv(mSocket, buffer, RECV_AT_ONCE, 0);
+        bufferBegin = buffer.begin();
+        recvLen = ::recv(mSocket, DataAddress(bufferBegin), RECV_AT_ONCE, 0);
         if (recvLen < 0) {
 #ifdef NETWORK_DEBUG
             ErrorHandle::WSAErrorMessageBox("recv function failure");
@@ -165,35 +171,33 @@ void Client::RecvWorker()
             break;
         }
 
+        bufferDataPos = bufferBegin + recvLen;
+
 #ifdef NETWORK_DEBUG
         std::cout << "RecvLen: " << recvLen << std::endl;
 #endif
 
+        remainLen = std::distance(remainBuffer.begin(), remainPos);
+#ifdef NETWORK_DEBUG
+        std::cout << "RemainLen: " << remainLen << std::endl;
+#endif
         // 이전에 남은 데이터가 있을때 다시 검사하는 과정
-        if (remainLen > 0) {
-            if (recvLen + remainLen > RECV_AT_ONCE) {
-                ErrorHandle::CommonErrorMessageBoxAbort("remain data is so big", "error");
-                break;
-            }
-            else {
-                memmove(buffer + remainLen, buffer, recvLen);
-                memcpy(buffer, remainBuffer, remainLen);
-            }
+        if (remainLen != 0) {
+            bufferDataPos = std::move(bufferBegin, bufferDataPos, bufferBegin + remainLen);
+            std::copy(remainBegin, remainPos, bufferBegin);
+            remainPos = remainBuffer.begin();
         }
 
-        // 새로 받아온 데이터에 대해서 검사하는 과정
-        remainLen = CheckPackets(buffer, recvLen);
-        dataLen = recvLen - remainLen;
-        if (remainLen > 0) {
-            std::lock_guard lock{ mRecvLock };
-            mRecvBuffer->Write(buffer, dataLen);
-            memcpy(remainBuffer, buffer + dataLen, remainLen);
+        //// 새로 받아온 데이터에 대해서 검사하는 과정
+        auto remainDataBegin = ValiatePackets(bufferBegin, bufferDataPos);
+        if (remainDataBegin != bufferBegin) {
+            remainPos = std::copy(remainDataBegin, bufferDataPos, remainBegin);
+            bufferDataPos = remainDataBegin;
         }
-        else {
-            std::lock_guard lock{ mRecvLock };
-            mRecvBuffer->Write(buffer, dataLen);
-        }
-        }
+
+        std::lock_guard lock{ mRecvLock };
+        mRecvBuffer->Write(DataAddress(bufferBegin), std::distance(bufferBegin, bufferDataPos));
+    }
 
     mEntered.clear();
 }
@@ -234,23 +238,16 @@ bool Client::NullClient() const
     return not mEntered.test() and mCleared.test();
 }
 
-size_t Client::CheckPackets(char* buffer, size_t len)
+// 수정 필: RBuffer::end를 호출하면 DataLen과 다름
+Client::RBuffer::iterator Client::ValiatePackets(const RBuffer::iterator& dataBegin, const RBuffer::iterator& dataEnd)
 {
-    size_t checkLen = 0;
-    size_t remainLen = 0;
-    while (checkLen < len) {
-        checkLen += buffer[0];
-#if defined(_DEBUG) || defined(DEBUG)
-        if (buffer[0] == 0) {
-            ErrorHandle::CommonErrorMessageBoxAbort("Recv Size is 0", "Packet's size member value is zero");
-        }
-#endif
-
-        if (len > checkLen) {
-            remainLen = len - checkLen;
+    auto it = dataBegin;
+    while (it != dataEnd) {
+        if (std::distance(it, dataEnd) < *it) {
             break;
         }
+        it += *it;
     }
 
-    return remainLen;
+    return it;
 }

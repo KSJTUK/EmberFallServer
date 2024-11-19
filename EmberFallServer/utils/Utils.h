@@ -102,3 +102,9 @@ namespace ErrorHandle {
         abort();
     }
 }
+
+template <typename Iterator> requires std::_Is_iterator_v<Iterator>
+auto DataAddress(Iterator& iter)
+{
+    return &(*iter);
+}

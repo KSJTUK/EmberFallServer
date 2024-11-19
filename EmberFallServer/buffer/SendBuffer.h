@@ -1,7 +1,7 @@
 #pragma once
 
 class SendBuffer {
-    inline static constexpr size_t BUFFER_SIZE = 4096;
+    inline static constexpr size_t BUFFER_SIZE = 1024 * 10;
 public:
     SendBuffer();
     ~SendBuffer();
@@ -16,18 +16,18 @@ public:
     const char* Buffer() const;
 
     /// <returns>현재 버퍼에 쓰여진 데이터의 크기를 반환</returns>
-    INT32 DataSize() const;
+    size_t DataSize() const;
 
     /// <summary>
     /// data에 넘어온 메모리를 writeByte만큼 내부 버퍼에 복사
     /// </summary>
     /// <returns>현재 버퍼에 남은 크기가 writeBytes 보다 작다면 복사하지 않고 false를 리턴</returns>
-    bool Write(const void* data, INT32 writeBytes);
+    bool Write(const void* data, size_t writeBytes);
 
     /// <returns>현재 버퍼에 쓰여진 데이터가 없다면 true리턴</returns>
     bool Empty() const;
 
 private:
-    INT32 mWriteCursor;
+    size_t mWriteCursor;
     std::array<char, BUFFER_SIZE> mBuffer;
 };

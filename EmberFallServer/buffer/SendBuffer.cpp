@@ -21,12 +21,12 @@ const char* SendBuffer::Buffer() const
     return mBuffer.data();
 }
 
-INT32 SendBuffer::DataSize() const
+size_t SendBuffer::DataSize() const
 {
     return mWriteCursor;
 }
 
-bool SendBuffer::Write(const void* data, INT32 writeBytes)
+bool SendBuffer::Write(const void* data, size_t writeBytes)
 {
     if (mBuffer.size() - mWriteCursor < writeBytes) {
         return false;

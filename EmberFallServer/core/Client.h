@@ -1,8 +1,12 @@
 #pragma once
 
 class Client {
-    static constexpr size_t RECV_AT_ONCE = 1024;
+    static constexpr size_t MAX_ONE_PACKET_SIZE = 100;
+    static constexpr size_t RECV_AT_ONCE = 4096;
     static constexpr size_t SEND_AT_ONCE = 512;
+
+public:
+    using RBuffer = std::array<char, RECV_AT_ONCE + MAX_ONE_PACKET_SIZE>;
 
 public:
     Client();
@@ -32,7 +36,7 @@ public:
     // 클라이언트가 퇴장했고 정리되었다면 true를 반환한다.
     bool NullClient() const;
 
-    size_t CheckPackets(char* buffer, size_t len);
+    RBuffer::iterator ValiatePackets(const RBuffer::iterator& it, const RBuffer::iterator& dataEnd);
 
 private:
     SOCKET mSocket;

@@ -49,4 +49,9 @@
 
 #include "Protocol.h"
 
+//#define NETWORK_DEBUG
+
+template <size_t csize>
+using ByteArray = std::array<char, csize>;
+
 extern class Timer gTimer;
